@@ -113,3 +113,7 @@ body.sticky-header header{
 body.sticky-header header h1{
     transform: scale(0, 0);
 }
+
+.codigoarduino{
+    text-align: center;
+}
