@@ -116,4 +116,10 @@ body.sticky-header header h1{
 
 .codigoarduino{
     text-align: center;
+    max-width: 100%;
+}
+
+.primercontacto{
+    text-align: center;
+    max-width: 100%;
 }
