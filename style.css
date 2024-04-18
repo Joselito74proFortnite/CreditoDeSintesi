@@ -76,10 +76,10 @@ header nav a:hover{
 .footer-distributed{
     background-color: skyblue;
     box-sizing: border-box;
-    widows: 100%;
+    width: 100%;
     text-align: left;
     font: bold 16px sans-serif;
-    padding: 50px 50px 60px 50px;
+    padding: 25px 25px 25px 25px;
     margin-top: 80px;
 }
 .footer-distributed .footer-left .footer-distributed .footer-center .footer-distributed .footer-right{
@@ -92,13 +92,13 @@ header nav a:hover{
 }
 
 .footer-distributed h3{
-    color: floralwhite;
+    color: yellow;
     font: normal 36px 'cookie', cursive;
     margin: 0;
 }
 
 .footer-distributed h3 span{
-    color: orange;
+    color: blue;
     margin: 20px 0 12px;
 }
 
@@ -110,7 +110,7 @@ header nav a:hover{
 }
 
 .footer-distributed .footer-company-name{
-    color: blue;
+    color: grey;
     font-size: 14px;
     font-weight: normal;
     margin: 0;
@@ -121,8 +121,8 @@ header nav a:hover{
 }
 
 .footer-distributed .footer-center i{
-    background-color: red;
-    color: blueviolet;
+    background-color: yellow;
+    color: black;
     font-size: 25px;
     width: 38px;
     height: 38px;
@@ -140,7 +140,7 @@ header nav a:hover{
 
 .footer-distributed .footer-center p{
     display: inline-block;
-    color: chartreuse;
+    color: blue;
     vertical-align: middle;
     margin: 0;
 }
@@ -153,7 +153,7 @@ header nav a:hover{
 }
 
 .footer-distributed .footer-center p a{
-    color: cyan;
+    color: blue;
     text-decoration: none;
 }
 
@@ -171,7 +171,7 @@ header nav a:hover{
 
 .footer-distributed .footer-company-about span{
     display: block;
-    color: yellow;
+    color: black;
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 20px;
@@ -186,10 +186,10 @@ header nav a:hover{
     width: 35px;
     height: 35px;
     cursor: pointer;
-    background-color: black;
+    background-color: yellow;
     border-radius: 2px;
     font-size: 20px;
-    color: green;
+    color: black;
     text-align: center;
     line-height: 35px;
     margin-right: 3px;
@@ -197,11 +197,12 @@ header nav a:hover{
 }
 
 .footer-distributed .footer-icons a:hover{
-    background-color: brown;
+    background-color: blue;
 }
-
+    
 .footer-links a:hover{
     color:red;
+    z-index: 12;
 }
 
 @media(max-width: 880px){
@@ -221,7 +222,7 @@ h2{
     text-transform: uppercase;
     font-weight: 400;
     line-height: 2;
-    color: black;
+    color: white;
 }
 
 p{
