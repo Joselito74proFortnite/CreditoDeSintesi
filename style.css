@@ -77,7 +77,7 @@ header nav a:hover{
     background-color: skyblue;
     box-sizing: border-box;
     width: 100%;
-    text-align: left;
+    text-align: left
     font: bold 16px sans-serif;
     padding: 25px 25px 25px 25px;
     margin-top: 80px;
@@ -85,21 +85,26 @@ header nav a:hover{
 .footer-distributed .footer-left .footer-distributed .footer-center .footer-distributed .footer-right{
     display: inline-block;
     vertical-align: top;
+    width: 100%;
 }
 
 .footer-distributed .footer-left{
-    width: 30%;
+    width: 100%;
+    text-align: center
 }
 
 .footer-distributed h3{
     color: yellow;
     font: normal 36px 'cookie', cursive;
     margin: 0;
+    width: 100%;
+    
 }
 
 .footer-distributed h3 span{
     color: blue;
     margin: 20px 0 12px;
+    width: 100%;
 }
 
 .footer-distributed .footer-links a{
@@ -136,6 +141,7 @@ header nav a:hover{
 .footer-distributed .footer-center i.fa-envelope{
     font-size: 17px;
     line-height: 38px;
+    text-align: center
 }
 
 .footer-distributed .footer-center p{
@@ -143,6 +149,7 @@ header nav a:hover{
     color: blue;
     vertical-align: middle;
     margin: 0;
+    text-align: center
 }
 
 .footer-distributed .footer-center p span{
@@ -150,15 +157,18 @@ header nav a:hover{
     font-weight: normal;
     font-size: 14px;
     line-height: 2;
+    text-align: center
 }
 
 .footer-distributed .footer-center p a{
     color: blue;
     text-decoration: none;
+    text-align: center
 }
 
 .footer-distributed .footer-right{
-    width: 30%;
+    width: 100%;
+    text-align: center
 }
 
 .footer-distributed .footer-company-about{
@@ -167,6 +177,7 @@ header nav a:hover{
     font-size: 13px;
     font-weight: normal;
     margin: 0;
+    
 }
 
 .footer-distributed .footer-company-about span{
