@@ -7,7 +7,7 @@
 }
 
 body{
-    background: url('5f009674bb012f8e26ea43dad4abdd00.gif') no-repeat;
+    background: url('5ARz.gif') no-repeat;
     background-size: cover;
     background-position: center;
     padding-top: 330px;
@@ -129,7 +129,7 @@ header nav a:hover{
 }
 
 .footer-distributed .footer-center i{
-    background-color: yellow;
+    background-color: cyan;
     color: black;
     font-size: 25px;
     width: 38px;
@@ -200,7 +200,7 @@ header nav a:hover{
     width: 35px;
     height: 35px;
     cursor: pointer;
-    background-color: yellow;
+    background-color: cyan;
     border-radius: 2px;
     font-size: 20px;
     color: black;
@@ -211,11 +211,11 @@ header nav a:hover{
 }
 
 .footer-distributed .footer-icons a:hover{
-    background-color: red;
+    background-color: blue;
 }
     
 .footer-links a:hover{
-    color:red;
+    color: blue;
     z-index: 12;
 }
 
@@ -293,6 +293,11 @@ body.sticky-header header h1{
 }
 
 .primercontacto{
+    text-align: center;
+    max-width: 100%;
+}
+
+.robotinicio {
     text-align: center;
     max-width: 100%;
 }
