@@ -1,3 +1,4 @@
+
 $(function(){
     $(window).scroll(function(){
         var winTop = $(window).scrollTop();
@@ -25,4 +26,3 @@ fetch("./footer.html")
   .then(data => {
     document.querySelector("header").innerHTML = data;
   });
-
