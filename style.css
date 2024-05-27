@@ -11,7 +11,6 @@ body{
     background-size: cover;
     background-position: center;
     padding-top: 330px;
-    transition: padding-top 0.5s ease;
 }
 
 header{
@@ -30,7 +29,7 @@ header h1{
     color: whitesmoke;
     line-height: 150px;
     font-weight: 300;
-    transition: all 0.3 ease;
+
 }
 
 header h1{
@@ -80,7 +79,7 @@ header nav a:hover{
     background-color: whitesmoke;
     box-sizing: border-box;
     width: 100%;
-    text-align: left
+    text-align: left;
     font: bold 16px sans-serif;
     padding: 25px 25px 25px 25px;
     margin-top: 80px;
