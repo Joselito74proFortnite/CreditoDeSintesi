@@ -300,3 +300,7 @@ body.sticky-header header h1{
     text-align: center;
     max-width: 100%;
 }
+
+.photo {
+    margin-top: 10px;
+}
