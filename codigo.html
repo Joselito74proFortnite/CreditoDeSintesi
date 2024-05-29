@@ -25,15 +25,11 @@
 
             <p>
               //*******************************************************************************
-/*
-keyestudio 4wd BT Car 
-lesson 14
-IR remote Control Car
-http://www.keyestudio.com
-*/ 
 #define SCL_Pin  A5  //Set the clock pin to A5
 #define SDA_Pin  A4  //Set data pin to A4
+
 //Array, used to store the data of pattern, can be calculated by yourself or obtained from the modulus tool
+
 unsigned char start01[] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01};
 unsigned char efront[] = {0xfc, 0x24, 0x24, 0xfc, 0x00, 0xfc, 0x04, 0xfc, 0x04, 0xfc, 0x00, 0xfc, 0x24, 0xfc, 0x00, 0xfc};
 unsigned char eback[] = {0x78, 0xcc, 0x84, 0x84, 0x00, 0xfc, 0x80, 0x80, 0xfc, 0x00, 0xfc, 0x30, 0x48, 0x84, 0x00, 0xfc};
@@ -137,37 +133,38 @@ void loop() {
             // SIGUELINEAS
             break;
         
-      case 0xFF629D : car_front(); //Receive 0xFF629D,the car goes forward
+      case 0xFF629D : car_front(); //Recive 0xFF629D, el coche va hacia delante
       matrix_display(clear);
       matrix_display(efront);   
       break;
       
-      case 0xFFA857 : car_back(); //Receive 0xFFA857,the car goes back
+      case 0xFFA857 : car_back(); //Receive 0xFFA857, el coche va para atras
       matrix_display(clear);
       matrix_display(eback); 
       break;
 
-      case 0xFF22DD : car_left(); //Receive 0xFF22DD,the car left rotates
+      case 0xFF22DD : car_left(); //Receive 0xFF22DD,el coche gira hacia la izquierda
       matrix_display(clear);
       matrix_display(eleft); 
       break;
      
-      case 0xFFC23D : car_right();//Receive 0xFFC23D,the car right rotates
+      case 0xFFC23D : car_right();//Receive 0xFFC23D,el coche gira hacia la derecha
       matrix_display(clear);
       matrix_display(eright);  
       break;
      
-      case 0xFF02FD : car_Stop();//Receive 0xFF02FD,the car stops
+      case 0xFF02FD : car_Stop();//Receive 0xFF02FD,el coche para
       matrix_display(clear);
       matrix_display(STOP01); 
       break;
     }
-        irrecv.resume(); // Receive the next value
+        irrecv.resume(); // recive el siguiente valor
   }
 
   
    if (mode == 1) {
-      avoid(); 
+      //automatico
+      avoid(); //inicia el control automatico
    } 
 
    if (mode == 2) {
@@ -186,24 +183,24 @@ void avoid()
   {
     car_Stop();//stop
     matrix_display(clear);
-    matrix_display(STOP01);//show stop pattern
+    matrix_display(STOP01);//en la pantalla sale que para
     delay(1000);
-    servopulse(servopin,160);//servo rotates to 160°
+    servopulse(servopin,160);//el servo gira 160°
     delay(500);
-    a1=sr04.Distance();//measure the distance
+    a1=sr04.Distance();//mide la distancia
     delay(100);
     servopulse(servopin,20);//rotate to 20 degree
     delay(500);
-    a2=sr04.Distance();//measure the distance
+    a2=sr04.Distance();//mide la distancia
     delay(100);
     servopulse(servopin,90);  //Return to the 90 degree position
     delay(500);
-    if(a1 > a2)//compare the distance, if left distance is more than right distance
+    if(a1 > a2)//compara la distancia, si la distancia de la izquierda es mas que la de la derecha
     {
-      car_left();//turn left
+      car_left();//gira hacia la izquierda
       matrix_display(clear);
       matrix_display(eleft);    //display left-turning pattern
-      servopulse(servopin,90);//servo rotates to 90 degree
+      servopulse(servopin,90); //servo gira 90 grados
       delay(700); //turn left 700ms
       matrix_display(clear);
       matrix_display(efront);  //show forward pattern
@@ -219,43 +216,43 @@ void avoid()
       matrix_display(efront);  //show forward pattern
     }
   }
-  else//otherwise
+  else //otherwise
   {
-    car_front();//go forward
+    car_front();//va recto
     matrix_display(clear);
     matrix_display(efront);  // show forward pattern
   }
 }
 
-void car_front()//define the state of going front
+void car_front() //define que va hacia delante
 {
-  digitalWrite(left_ctrl,HIGH);
-  analogWrite(left_pwm,105);
+  digitalWrite(left_ctrl,HIGH); //hacia delante
+  analogWrite(left_pwm,105); //velocidad
   digitalWrite(right_ctrl,HIGH);
   analogWrite(right_pwm,105);
 }
-void car_back()//define the status of going back
+void car_back() //define que va hacia detras
 {
   digitalWrite(left_ctrl,LOW);
   analogWrite(left_pwm,150);
   digitalWrite(right_ctrl,LOW);
   analogWrite(right_pwm,150);
 }
-void car_left()//set the status of left turning
+void car_left() //define que el coche gira hacia la izquierda
 {
   digitalWrite(left_ctrl, LOW);
   analogWrite(left_pwm, 100);  
   digitalWrite(right_ctrl, HIGH);
   analogWrite(right_pwm, 155);
 }
-void car_right()//set the status of right turning
+void car_right() //define que el coche gira hacia la derecha
 {
   digitalWrite(left_ctrl, HIGH);
   analogWrite(left_pwm, 155);
   digitalWrite(right_ctrl, LOW);
   analogWrite(right_pwm, 100);
 }
-void car_Stop()//define the state of stop
+void car_Stop() //con esto defines que el coche pare
 {
   digitalWrite(left_ctrl,LOW);
   analogWrite(left_pwm,0);
@@ -264,6 +261,7 @@ void car_Stop()//define the state of stop
 }
 
 //this function is used for dot matrix display
+
 void matrix_display(unsigned char matrix_value[])
 {
   IIC_start();  //the function that calls the data transfer start condition
@@ -279,6 +277,7 @@ void matrix_display(unsigned char matrix_value[])
   IIC_end();
 }
 //Conditions under which data transmission begins
+
 void IIC_start()
 {
   digitalWrite(SDA_Pin, HIGH);
@@ -288,7 +287,9 @@ void IIC_start()
   delayMicroseconds(3);
   digitalWrite(SCL_Pin, LOW);
 }
+
 //Indicates the end of data transmission
+
 void IIC_end()
 {
   digitalWrite(SCL_Pin, LOW);
@@ -299,7 +300,9 @@ void IIC_end()
   digitalWrite(SDA_Pin, HIGH);
   delayMicroseconds(3);
 }
+
 //transmit data
+
 void IIC_send(unsigned char send_data)
 {
   for (byte mask = 0x01; mask != 0; mask <<= 1) //Each byte has 8 bits and is checked bit by bit starting at the lowest level
@@ -339,19 +342,19 @@ void servopulse(int servopin,int myangle)//the running angle of servo
 
 void tracking()
 {
-  L_val = digitalRead(sensor_L);//read the value of left line tracking sensor
-  M_val = digitalRead(sensor_M);//read the value of middle line tracking sensor
-  R_val = digitalRead(sensor_R);//read the value of right line tracking sensor
+  L_val = digitalRead(sensor_L); //lee el valor del sensor de movimiento izquierdo
+  M_val = digitalRead(sensor_M); //lee el valor del sensor de movimiento del medio
+  R_val = digitalRead(sensor_R); //lee el valor del sensor de movimiento derecho
 
-  if(M_val == 1){//if the state of middle one is 1, which means detecting black line
+  if(M_val == 1){// si el estado del del medio es 1, que significa que detecta la linea negra
 
-     if (L_val == 1 && R_val == 0) { //If a black line is detected on the left, but not on the right, turn left
+     if (L_val == 1 && R_val == 0) { //si la linea negra se detecta en la izquierda, pero no en la derecha, gira hacia la izquierda
         left();
     }
-     else if (L_val == 0 && R_val == 1) { //Otherwise, if a black line is detected on the right and not on the left, turn right
+     else if (L_val == 0 && R_val == 1) { //por otra parte, si la linea negra se detecta en la derecha, pero no en la izquierda, gira hacia la derecha
       right();
     }
-     else { //Otherwise,forward
+     else { //por otra parte, va recto
       front();
     }
   }
