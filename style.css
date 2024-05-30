@@ -128,7 +128,7 @@ header nav a:hover{
 
 .footer-distributed .footer-center{
     width: 35%;
-    text-align: center;
+    text-align: left;
 }
 
 .footer-distributed .footer-center i{
@@ -138,7 +138,7 @@ header nav a:hover{
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    text-align: center;
+    text-align: left;
     line-height: 42px;
     margin: 10px 15px;
     vertical-align: middle;
@@ -147,7 +147,7 @@ header nav a:hover{
 .footer-distributed .footer-center i.fa-envelope{
     font-size: 17px;
     line-height: 38px;
-    text-align: center
+    text-align: left
 }
 
 .footer-distributed .footer-center p{
@@ -155,6 +155,7 @@ header nav a:hover{
     color: black;
     vertical-align: middle;
     margin: 0;
+    text-align: left;
 }
 
 .footer-distributed .footer-center p span{
