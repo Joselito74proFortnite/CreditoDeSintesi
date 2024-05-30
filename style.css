@@ -100,13 +100,14 @@ header nav a:hover{
     font: normal 36px 'cookie', cursive;
     margin: 0;
     width: 100%;
-    
+    text-align: center;
 }
 
 .footer-distributed h3 span{
     color: black;
     margin: 20px 0 12px;
     width: 100%;
+    text-align: center;
 }
 
 .footer-distributed .footer-links a{
@@ -114,6 +115,7 @@ header nav a:hover{
     line-height: 1.8;
     text-decoration: none;
     color: inherit;
+    text-align: center;
 }
 
 .footer-distributed .footer-company-name{
@@ -121,6 +123,7 @@ header nav a:hover{
     font-size: 14px;
     font-weight: normal;
     margin: 0;
+    text-align: center;
 }
 
 .footer-distributed .footer-center{
@@ -299,8 +302,4 @@ body.sticky-header header h1{
 .robotinicio {
     text-align: center;
     max-width: 100%;
-}
-
-.photo {
-    margin-top: 30px;
 }
