@@ -107,6 +107,7 @@ header nav a:hover{
     color: black;
     margin: 20px 0 12px;
     width: 100%;
+    text-align: center;
 }
 
 .footer-distributed .footer-links a{
@@ -114,6 +115,7 @@ header nav a:hover{
     line-height: 1.8;
     text-decoration: none;
     color: inherit;
+    text-align: center;
 }
 
 .footer-distributed .footer-company-name{
@@ -121,10 +123,12 @@ header nav a:hover{
     font-size: 14px;
     font-weight: normal;
     margin: 0;
+    text-align: center;
 }
 
 .footer-distributed .footer-center{
     width: 35%;
+    text-align: center;
 }
 
 .footer-distributed .footer-center i{
@@ -134,6 +138,7 @@ header nav a:hover{
     width: 38px;
     height: 38px;
     border-radius: 50%;
+    text-align: center;
     line-height: 42px;
     margin: 10px 15px;
     vertical-align: middle;
@@ -142,6 +147,7 @@ header nav a:hover{
 .footer-distributed .footer-center i.fa-envelope{
     font-size: 17px;
     line-height: 38px;
+    text-align: center
 }
 
 .footer-distributed .footer-center p{
