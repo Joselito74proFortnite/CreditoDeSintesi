@@ -180,6 +180,7 @@ header nav a:hover{
     font-size: 13px;
     font-weight: normal;
     margin: 0;
+    text-align: center;
 }
 
 .footer-distributed .footer-company-about span{
@@ -188,10 +189,12 @@ header nav a:hover{
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 20px;
+    text-align: center;
 }
 
 .footer-distributed .footer-icons{
     margin-top: 25px;
+    text-align: center;
 }
 
 .footer-distributed .footer-icons a{
@@ -206,15 +209,18 @@ header nav a:hover{
     line-height: 35px;
     margin-right: 3px;
     margin-bottom: 5px;
+    text-align: center;
 }
 
 .footer-distributed .footer-icons a:hover{
     background-color: blue;
+    text-align: center;
 }
     
 .footer-links a:hover{
     color: blue;
     z-index: 12;
+    text-align: center;
 }
 
 @media(max-width: 880px){
