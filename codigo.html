@@ -23,390 +23,390 @@
 
             <p>Todo nuestro codigo fue creado desde 0 por nosotros con informacion sacada de repositorios github de otros usuarios, paginas web, youtube, etc...</p>
 
-            <p>
-              //*******************************************************************************
-#define SCL_Pin  A5  //Set the clock pin to A5
-#define SDA_Pin  A4  //Set data pin to A4
-
-//Array, used to store the data of pattern, can be calculated by yourself or obtained from the modulus tool
-
-unsigned char start01[] = {0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x32, 0x0c, 0x0c, 0x32};
-unsigned char efront[] = {0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x32, 0x0c, 0x0c, 0x32};
-unsigned char eback[] = {0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x32, 0x0c, 0x0c, 0x32};
-unsigned char eleft[] = {0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x32, 0x0c, 0x0c, 0x32};
-unsigned char eright[] = {0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x02, 0x3e, 0x02, 0x3e, 0x2a, 0x22, 0x32, 0x0c, 0x0c, 0x32};
-unsigned char STOP01[] = {0x7c, 0x12, 0x12, 0x12, 0x7c, 0x7e, 0x04, 0x08, 0x04, 0x7e, 0x7c, 0x12, 0x12, 0x7c, 0x00, 0x7e};
-unsigned char clear[] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-
-#include <Arduino.h>
-#include <IRremote.h>//function library of IR remote control
-int RECV_PIN = 3;//set the pin of IR receiver to D3
-IRrecv irrecv(RECV_PIN);
-long irr_val;
-decode_results results;
-
-int left_ctrl = 2;//define the direction control pins of group B motor
-int left_pwm = 5;//define the PWM control pins of group B motor
-int right_ctrl = 4;//define the direction control pins of group A motor
-int right_pwm = 6;//define the PWM control pins of group A motor
-
-//sigue lineas
-
-#define ML_Ctrl 4     //define direction control pin of B motor
-#define ML_PWM 5   //define PWM control pin of B motor
-#define MR_Ctrl 2    //define direction control pin of A motor
-#define MR_PWM 9   //define PWM control pin of A motor
-int sensor_L = 11;//define the pin of left line tracking sensor
-int sensor_M = 7;//define the pin of middle line tracking sensor
-int sensor_R = 8;//define the pin of right line tracking sensor
-int L_val,M_val,R_val;//define these variables
-
-
-#include <Servo.h>
-Servo servo_A3;//set the pin of servo to A3 
-
-unsigned char data_line = 0;
-unsigned char delay_count = 0;
-
-int mode = 0; 
-
-#include "SR04.h"//define the library of ultrasonic sensor
-#define TRIG_PIN 12// set the signal output of ultrasonic sensor to D12 
-#define ECHO_PIN 13//set the signal input of ultrasonic sensor to D13 
-SR04 sr04 = SR04(ECHO_PIN,TRIG_PIN);
-long distance,a1,a2;//define three distance
-const int servopin = A3;//set the pin of servo to A3 
-
-
-
-void setup() {
-  Serial.begin(9600);//
-  // In case the interrupt driver crashes on setup, give a clue
-  // to the user what's going on.
-  Serial.println("Enabling IRin");
-  irrecv.enableIRIn(); // Start the receiver
-  Serial.println("Enabled IRin");
-  pinMode(left_ctrl,OUTPUT);//set direction control pins of group B motor to OUTPUT
-  pinMode(left_pwm,OUTPUT);//set PWM control pins of group B motor to OUTPUT
-  pinMode(right_ctrl,OUTPUT);//set direction control pins of group A motor to OUTPUT
-  pinMode(right_pwm,OUTPUT);//set PWM control pins of group A motor to OUTPUT
-  servo_A3.attach(A3);
-  servo_A3.write(90);//the angle of servo is 90 degree
-  delay(300);
-  pinMode(SCL_Pin,OUTPUT);// Set the clock pin to output
-  pinMode(SDA_Pin,OUTPUT);//Set the data pin to output
-  matrix_display(clear);
-  matrix_display(start01); //display start01 expression pattern
-
-  //SIGUELINEAS
-  pinMode(sensor_L,INPUT);//set the pins of left line tracking sensor to INPUT
-  pinMode(sensor_M,INPUT);//set the pins of middle line tracking sensor to INPUT
-  pinMode(sensor_R,INPUT);//set the pins of right line tracking sensor to INPUT
-  
-}
-
-void loop() {
-
-  
-  if (irrecv.decode(&results)) {
-    irr_val = results.value;
-    Serial.println("BOTON:");
-    Serial.println(irr_val, HEX);//serial prints the read IR remote signals 
-
-
-    
-    switch(irr_val)
-    {
-
-// * FF42BD
-// # FF52AD
-
-      case 0xFF42BD : mode = 1;
-            // AUTO
-            break;
-  
-      case 0xFF52AD : mode = 0;
-            // MANUAL
-            break;
-
-      case 0xFF6897 : mode = 2;
-            // SIGUELINEAS
-            break;
-        
-      case 0xFF629D : car_front(); //Recive 0xFF629D, el coche va hacia delante
-      matrix_display(clear);
-      matrix_display(efront);   
-      break;
-      
-      case 0xFFA857 : car_back(); //Receive 0xFFA857, el coche va para atras
-      matrix_display(clear);
-      matrix_display(eback); 
-      break;
-
-      case 0xFF22DD : car_left(); //Receive 0xFF22DD,el coche gira hacia la izquierda
-      matrix_display(clear);
-      matrix_display(eleft); 
-      break;
-     
-      case 0xFFC23D : car_right();//Receive 0xFFC23D,el coche gira hacia la derecha
-      matrix_display(clear);
-      matrix_display(eright);  
-      break;
-     
-      case 0xFF02FD : car_Stop();//Receive 0xFF02FD,el coche para
-      matrix_display(clear);
-      matrix_display(STOP01); 
-      break;
-    }
-        irrecv.resume(); // recive el siguiente valor
-  }
-
-  
-   if (mode == 1) {
-      //automatico
-      avoid(); //inicia el control automatico
-   } 
-
-   if (mode == 2) {
-    // siguelineas
-    tracking(); //INICIA EL TRACKING
-   }
-}
-
-
-void avoid()
-{
-  distance=sr04.Distance(); //obtain the value detected by ultrasonic sensor 
-
-  if((distance < 20)&&(distance != 0))//if the distance is greater than 0 and less than 10  
-
-  {
-    car_Stop();//stop
-    matrix_display(clear);
-    matrix_display(STOP01);//en la pantalla sale que para
-    delay(1000);
-    servopulse(servopin,160);//el servo gira 160°
-    delay(500);
-    a1=sr04.Distance();//mide la distancia
-    delay(100);
-    servopulse(servopin,20);//rotate to 20 degree
-    delay(500);
-    a2=sr04.Distance();//mide la distancia
-    delay(100);
-    servopulse(servopin,90);  //Return to the 90 degree position
-    delay(500);
-    if(a1 > a2)//compara la distancia, si la distancia de la izquierda es mas que la de la derecha
-    {
-      car_left();//gira hacia la izquierda
-      matrix_display(clear);
-      matrix_display(eleft);    //display left-turning pattern
-      servopulse(servopin,90); //servo gira 90 grados
-      delay(700); //turn left 700ms
-      matrix_display(clear);
-      matrix_display(efront);  //show forward pattern
-    }
-    else//if the right distance is greater than the left
-    {
-      car_right();//turn right
-      matrix_display(clear);
-      matrix_display(eright);  //display right-turning pattern
-      servopulse(servopin,90);//servo rotates to 90 degree
-      delay(700);
-      matrix_display(clear);
-      matrix_display(efront);  //show forward pattern
-    }
-  }
-  else //otherwise
-  {
-    car_front();//va recto
-    matrix_display(clear);
-    matrix_display(efront);  // show forward pattern
-  }
-}
-
-void car_front() //define que va hacia delante
-{
-  digitalWrite(left_ctrl,HIGH); //hacia delante
-  analogWrite(left_pwm,105); //velocidad
-  digitalWrite(right_ctrl,HIGH);
-  analogWrite(right_pwm,105);
-}
-void car_back() //define que va hacia detras
-{
-  digitalWrite(left_ctrl,LOW);
-  analogWrite(left_pwm,150);
-  digitalWrite(right_ctrl,LOW);
-  analogWrite(right_pwm,150);
-}
-void car_left() //define que el coche gira hacia la izquierda
-{
-  digitalWrite(left_ctrl, LOW);
-  analogWrite(left_pwm, 100);  
-  digitalWrite(right_ctrl, HIGH);
-  analogWrite(right_pwm, 155);
-}
-void car_right() //define que el coche gira hacia la derecha
-{
-  digitalWrite(left_ctrl, HIGH);
-  analogWrite(left_pwm, 155);
-  digitalWrite(right_ctrl, LOW);
-  analogWrite(right_pwm, 100);
-}
-void car_Stop() //con esto defines que el coche pare
-{
-  digitalWrite(left_ctrl,LOW);
-  analogWrite(left_pwm,0);
-  digitalWrite(right_ctrl,LOW);
-  analogWrite(right_pwm,0);
-}
-
-//this function is used for dot matrix display
-
-void matrix_display(unsigned char matrix_value[])
-{
-  IIC_start();  //the function that calls the data transfer start condition
-  IIC_send(0xc0);  //select address
-
-  for (int i = 0; i < 16; i++) //the pattern data is 16 bytes
-  {
-    IIC_send(matrix_value[i]); //Transmit the data of the pattern
-  }
-  IIC_end();   //End pattern data transmission
-  IIC_start();
-  IIC_send(0x8A);  //Display control, select 4/16 pulse width
-  IIC_end();
-}
-//Conditions under which data transmission begins
-
-void IIC_start()
-{
-  digitalWrite(SDA_Pin, HIGH);
-  digitalWrite(SCL_Pin, HIGH);
-  delayMicroseconds(3);
-  digitalWrite(SDA_Pin, LOW);
-  delayMicroseconds(3);
-  digitalWrite(SCL_Pin, LOW);
-}
-
-//Indicates the end of data transmission
-
-void IIC_end()
-{
-  digitalWrite(SCL_Pin, LOW);
-  digitalWrite(SDA_Pin, LOW);
-  delayMicroseconds(3);
-  digitalWrite(SCL_Pin, HIGH);
-  delayMicroseconds(3);
-  digitalWrite(SDA_Pin, HIGH);
-  delayMicroseconds(3);
-}
-
-//transmit data
-
-void IIC_send(unsigned char send_data)
-{
-  for (byte mask = 0x01; mask != 0; mask <<= 1) //Each byte has 8 bits and is checked bit by bit starting at the lowest level
-  {
-    if (send_data & mask) { //Sets the high and low levels of SDA_Pin depending on whether each bit of the byte is a 1 or a 0
-      digitalWrite(SDA_Pin, HIGH);
-    } else {
-      digitalWrite(SDA_Pin, LOW);
-    }
-    delayMicroseconds(3);
-    digitalWrite(SCL_Pin, HIGH); //Pull the clock pin SCL_Pin high to stop data transmission
-    delayMicroseconds(3);
-    digitalWrite(SCL_Pin, LOW); //pull the clock pin SCL_Pin low to change the SIGNAL of SDA 
-  }
-}
-
-//FF6897 es el numero 1
-//FF9867 es el numero 2
-
-
-//*******************************************************************************
-
-
-void servopulse(int servopin,int myangle)//the running angle of servo
-{
-  for(int i=0; i<20; i++)
-  {
-    int pulsewidth = (myangle*11)+500;
-    digitalWrite(servopin,HIGH);
-    delayMicroseconds(pulsewidth);
-    digitalWrite(servopin,LOW);
-    delay(20-pulsewidth/1000);
-  } 
-}
-
-///codigo siguelineas
-
-void tracking()
-{
-  L_val = digitalRead(sensor_L); //lee el valor del sensor de movimiento izquierdo
-  M_val = digitalRead(sensor_M); //lee el valor del sensor de movimiento del medio
-  R_val = digitalRead(sensor_R); //lee el valor del sensor de movimiento derecho
-
-  if(M_val == 1){// si el estado del del medio es 1, que significa que detecta la linea negra
-
-     if (L_val == 1 && R_val == 0) { //si la linea negra se detecta en la izquierda, pero no en la derecha, gira hacia la izquierda
-        left();
-    }
-     else if (L_val == 0 && R_val == 1) { //por otra parte, si la linea negra se detecta en la derecha, pero no en la izquierda, gira hacia la derecha
-      right();
-    }
-     else { //por otra parte, va recto
-      front();
-    }
-  }
-  else { //No black lines detected in the middle
-    if (L_val == 1 && R_val == 0) { //If a black line is detected on the left, but not on the right, turn left
-      left();
-    }
-    else if (L_val == 0 && R_val == 1) { //Otherwise, if a black line is detected on the right and not on the left, turn right
-      right();
-    }
-    else { //Otherwise,stop
-      Stop();
-    }
-  }
-}
-void front()//define the status of going forward
-{
-  digitalWrite(left_ctrl,HIGH);
-  analogWrite(left_pwm,155);
-  digitalWrite(right_ctrl,HIGH);
-  analogWrite(right_pwm,155);
-}
-void back()//define the state of going back
-{
-  digitalWrite(left_ctrl,LOW);
-  analogWrite(left_pwm,100);
-  digitalWrite(right_ctrl,LOW);
-  analogWrite(right_pwm,100);
-}
-void left()//define the left-turning state
-{
-  digitalWrite(left_ctrl, LOW);
-  analogWrite(left_pwm, 100);  
-  digitalWrite(right_ctrl, HIGH);
-  analogWrite(right_pwm, 155);
-}
-void right()//define the right-turning state
-{
-  digitalWrite(left_ctrl, HIGH);
-  analogWrite(left_pwm, 155);
-  digitalWrite(right_ctrl, LOW);
-  analogWrite(right_pwm, 100);
-}
-void Stop()//define the state of stop
-{
-  digitalWrite(left_ctrl, LOW);
-  analogWrite(left_pwm,0);
-  digitalWrite(right_ctrl, LOW);
-  analogWrite(right_pwm,0);
-}
-//*********************************************************
-            </p>
+            <p><!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #888888">//*******************************************************************************</span>
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>define SCL_Pin  A5  <span style="color: #888888">//Set the clock pin to A5</span>
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>define SDA_Pin  A4  <span style="color: #888888">//Set data pin to A4</span>
+              
+              <span style="color: #888888">//Array, used to store the data of pattern, can be calculated by yourself or obtained from the modulus tool</span>
+              
+              unsigned <span style="color: #333399; font-weight: bold">char</span> start01<span style="color: #333333">[]</span> <span style="color: #333333">=</span> <span style="color: #333333">{</span><span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">};</span>
+              unsigned <span style="color: #333399; font-weight: bold">char</span> efront<span style="color: #333333">[]</span> <span style="color: #333333">=</span> <span style="color: #333333">{</span><span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">};</span>
+              unsigned <span style="color: #333399; font-weight: bold">char</span> eback<span style="color: #333333">[]</span> <span style="color: #333333">=</span> <span style="color: #333333">{</span><span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">};</span>
+              unsigned <span style="color: #333399; font-weight: bold">char</span> eleft<span style="color: #333333">[]</span> <span style="color: #333333">=</span> <span style="color: #333333">{</span><span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">};</span>
+              unsigned <span style="color: #333399; font-weight: bold">char</span> eright<span style="color: #333333">[]</span> <span style="color: #333333">=</span> <span style="color: #333333">{</span><span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x02</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x3e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x2a</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x22</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x0c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x32</span><span style="color: #333333">};</span>
+              unsigned <span style="color: #333399; font-weight: bold">char</span> STOP01<span style="color: #333333">[]</span> <span style="color: #333333">=</span> <span style="color: #333333">{</span><span style="color: #005588; font-weight: bold">0x7c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x12</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x12</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x12</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x7c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x7e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x04</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x08</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x04</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x7e</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x7c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x12</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x12</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x7c</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span> <span style="color: #005588; font-weight: bold">0x7e</span><span style="color: #333333">};</span>
+              unsigned <span style="color: #333399; font-weight: bold">char</span> clear<span style="color: #333333">[]</span> <span style="color: #333333">=</span> <span style="color: #333333">{</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">,</span><span style="color: #005588; font-weight: bold">0x00</span><span style="color: #333333">};</span>
+              
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>include <span style="color: #333333">&lt;</span>Arduino<span style="color: #333333">.</span><span style="color: #0000CC">h</span><span style="color: #333333">&gt;</span>
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>include <span style="color: #333333">&lt;</span>IRremote<span style="color: #333333">.</span><span style="color: #0000CC">h</span><span style="color: #333333">&gt;</span><span style="color: #888888">//function library of IR remote control</span>
+              <span style="color: #333399; font-weight: bold">int</span> RECV_PIN <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span><span style="color: #333333">;</span><span style="color: #888888">//set the pin of IR receiver to D3</span>
+              IRrecv <span style="color: #0066BB; font-weight: bold">irrecv</span><span style="color: #333333">(</span>RECV_PIN<span style="color: #333333">);</span>
+              <span style="color: #333399; font-weight: bold">long</span> irr_val<span style="color: #333333">;</span>
+              decode_results results<span style="color: #333333">;</span>
+              
+              <span style="color: #333399; font-weight: bold">int</span> left_ctrl <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">2</span><span style="color: #333333">;</span><span style="color: #888888">//define the direction control pins of group B motor</span>
+              <span style="color: #333399; font-weight: bold">int</span> left_pwm <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">5</span><span style="color: #333333">;</span><span style="color: #888888">//define the PWM control pins of group B motor</span>
+              <span style="color: #333399; font-weight: bold">int</span> right_ctrl <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span><span style="color: #333333">;</span><span style="color: #888888">//define the direction control pins of group A motor</span>
+              <span style="color: #333399; font-weight: bold">int</span> right_pwm <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span><span style="color: #333333">;</span><span style="color: #888888">//define the PWM control pins of group A motor</span>
+              
+              <span style="color: #888888">//sigue lineas</span>
+              
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>define ML_Ctrl <span style="color: #0000DD; font-weight: bold">4</span>     <span style="color: #888888">//define direction control pin of B motor</span>
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>define ML_PWM <span style="color: #0000DD; font-weight: bold">5</span>   <span style="color: #888888">//define PWM control pin of B motor</span>
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>define MR_Ctrl <span style="color: #0000DD; font-weight: bold">2</span>    <span style="color: #888888">//define direction control pin of A motor</span>
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>define MR_PWM <span style="color: #0000DD; font-weight: bold">9</span>   <span style="color: #888888">//define PWM control pin of A motor</span>
+              <span style="color: #333399; font-weight: bold">int</span> sensor_L <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">11</span><span style="color: #333333">;</span><span style="color: #888888">//define the pin of left line tracking sensor</span>
+              <span style="color: #333399; font-weight: bold">int</span> sensor_M <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span><span style="color: #333333">;</span><span style="color: #888888">//define the pin of middle line tracking sensor</span>
+              <span style="color: #333399; font-weight: bold">int</span> sensor_R <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">8</span><span style="color: #333333">;</span><span style="color: #888888">//define the pin of right line tracking sensor</span>
+              <span style="color: #333399; font-weight: bold">int</span> L_val<span style="color: #333333">,</span>M_val<span style="color: #333333">,</span>R_val<span style="color: #333333">;</span><span style="color: #888888">//define these variables</span>
+              
+              
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>include <span style="color: #333333">&lt;</span>Servo<span style="color: #333333">.</span><span style="color: #0000CC">h</span><span style="color: #333333">&gt;</span>
+              Servo servo_A3<span style="color: #333333">;</span><span style="color: #888888">//set the pin of servo to A3 </span>
+              
+              unsigned <span style="color: #333399; font-weight: bold">char</span> data_line <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">;</span>
+              unsigned <span style="color: #333399; font-weight: bold">char</span> delay_count <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">;</span>
+              
+              <span style="color: #333399; font-weight: bold">int</span> mode <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">;</span> 
+              
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>include <span style="background-color: #fff0f0">&quot;SR04.h&quot;</span><span style="color: #888888">//define the library of ultrasonic sensor</span>
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>define TRIG_PIN <span style="color: #0000DD; font-weight: bold">12</span><span style="color: #888888">// set the signal output of ultrasonic sensor to D12 </span>
+              <span style="color: #FF0000; background-color: #FFAAAA">#</span>define ECHO_PIN <span style="color: #0000DD; font-weight: bold">13</span><span style="color: #888888">//set the signal input of ultrasonic sensor to D13 </span>
+              SR04 sr04 <span style="color: #333333">=</span> SR04<span style="color: #333333">(</span>ECHO_PIN<span style="color: #333333">,</span>TRIG_PIN<span style="color: #333333">);</span>
+              <span style="color: #333399; font-weight: bold">long</span> distance<span style="color: #333333">,</span>a1<span style="color: #333333">,</span>a2<span style="color: #333333">;</span><span style="color: #888888">//define three distance</span>
+              <span style="color: #008800; font-weight: bold">const</span> <span style="color: #333399; font-weight: bold">int</span> servopin <span style="color: #333333">=</span> A3<span style="color: #333333">;</span><span style="color: #888888">//set the pin of servo to A3 </span>
+              
+              
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">setup</span><span style="color: #333333">()</span> <span style="color: #333333">{</span>
+                Serial<span style="color: #333333">.</span><span style="color: #0000CC">begin</span><span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">9600</span><span style="color: #333333">);</span><span style="color: #888888">//</span>
+                <span style="color: #888888">// In case the interrupt driver crashes on setup, give a clue</span>
+                <span style="color: #888888">// to the user what&#39;s going on.</span>
+                Serial<span style="color: #333333">.</span><span style="color: #0000CC">println</span><span style="color: #333333">(</span><span style="background-color: #fff0f0">&quot;Enabling IRin&quot;</span><span style="color: #333333">);</span>
+                irrecv<span style="color: #333333">.</span><span style="color: #0000CC">enableIRIn</span><span style="color: #333333">();</span> <span style="color: #888888">// Start the receiver</span>
+                Serial<span style="color: #333333">.</span><span style="color: #0000CC">println</span><span style="color: #333333">(</span><span style="background-color: #fff0f0">&quot;Enabled IRin&quot;</span><span style="color: #333333">);</span>
+                pinMode<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span>OUTPUT<span style="color: #333333">);</span><span style="color: #888888">//set direction control pins of group B motor to OUTPUT</span>
+                pinMode<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span>OUTPUT<span style="color: #333333">);</span><span style="color: #888888">//set PWM control pins of group B motor to OUTPUT</span>
+                pinMode<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span>OUTPUT<span style="color: #333333">);</span><span style="color: #888888">//set direction control pins of group A motor to OUTPUT</span>
+                pinMode<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span>OUTPUT<span style="color: #333333">);</span><span style="color: #888888">//set PWM control pins of group A motor to OUTPUT</span>
+                servo_A3<span style="color: #333333">.</span><span style="color: #0000CC">attach</span><span style="color: #333333">(</span>A3<span style="color: #333333">);</span>
+                servo_A3<span style="color: #333333">.</span><span style="color: #0000CC">write</span><span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">90</span><span style="color: #333333">);</span><span style="color: #888888">//the angle of servo is 90 degree</span>
+                delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">300</span><span style="color: #333333">);</span>
+                pinMode<span style="color: #333333">(</span>SCL_Pin<span style="color: #333333">,</span>OUTPUT<span style="color: #333333">);</span><span style="color: #888888">// Set the clock pin to output</span>
+                pinMode<span style="color: #333333">(</span>SDA_Pin<span style="color: #333333">,</span>OUTPUT<span style="color: #333333">);</span><span style="color: #888888">//Set the data pin to output</span>
+                matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                matrix_display<span style="color: #333333">(</span>start01<span style="color: #333333">);</span> <span style="color: #888888">//display start01 expression pattern</span>
+              
+                <span style="color: #888888">//SIGUELINEAS</span>
+                pinMode<span style="color: #333333">(</span>sensor_L<span style="color: #333333">,</span>INPUT<span style="color: #333333">);</span><span style="color: #888888">//set the pins of left line tracking sensor to INPUT</span>
+                pinMode<span style="color: #333333">(</span>sensor_M<span style="color: #333333">,</span>INPUT<span style="color: #333333">);</span><span style="color: #888888">//set the pins of middle line tracking sensor to INPUT</span>
+                pinMode<span style="color: #333333">(</span>sensor_R<span style="color: #333333">,</span>INPUT<span style="color: #333333">);</span><span style="color: #888888">//set the pins of right line tracking sensor to INPUT</span>
+                
+              <span style="color: #333333">}</span>
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">loop</span><span style="color: #333333">()</span> <span style="color: #333333">{</span>
+              
+                
+                <span style="color: #008800; font-weight: bold">if</span> <span style="color: #333333">(</span>irrecv<span style="color: #333333">.</span><span style="color: #0000CC">decode</span><span style="color: #333333">(&amp;</span>results<span style="color: #333333">))</span> <span style="color: #333333">{</span>
+                  irr_val <span style="color: #333333">=</span> results<span style="color: #333333">.</span><span style="color: #0000CC">value</span><span style="color: #333333">;</span>
+                  Serial<span style="color: #333333">.</span><span style="color: #0000CC">println</span><span style="color: #333333">(</span><span style="background-color: #fff0f0">&quot;BOTON:&quot;</span><span style="color: #333333">);</span>
+                  Serial<span style="color: #333333">.</span><span style="color: #0000CC">println</span><span style="color: #333333">(</span>irr_val<span style="color: #333333">,</span> HEX<span style="color: #333333">);</span><span style="color: #888888">//serial prints the read IR remote signals </span>
+              
+              
+                  
+                  <span style="color: #008800; font-weight: bold">switch</span><span style="color: #333333">(</span>irr_val<span style="color: #333333">)</span>
+                  <span style="color: #333333">{</span>
+              
+              <span style="color: #888888">// * FF42BD</span>
+              <span style="color: #888888">// # FF52AD</span>
+              
+                    <span style="color: #008800; font-weight: bold">case</span> <span style="color: #005588; font-weight: bold">0xFF42BD</span> <span style="color: #333333">:</span> mode <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span><span style="color: #333333">;</span>
+                          <span style="color: #888888">// AUTO</span>
+                          <span style="color: #008800; font-weight: bold">break</span><span style="color: #333333">;</span>
+                
+                    <span style="color: #008800; font-weight: bold">case</span> <span style="color: #005588; font-weight: bold">0xFF52AD</span> <span style="color: #333333">:</span> mode <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">;</span>
+                          <span style="color: #888888">// MANUAL</span>
+                          <span style="color: #008800; font-weight: bold">break</span><span style="color: #333333">;</span>
+              
+                    <span style="color: #008800; font-weight: bold">case</span> <span style="color: #005588; font-weight: bold">0xFF6897</span> <span style="color: #333333">:</span> mode <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">2</span><span style="color: #333333">;</span>
+                          <span style="color: #888888">// SIGUELINEAS</span>
+                          <span style="color: #008800; font-weight: bold">break</span><span style="color: #333333">;</span>
+                      
+                    <span style="color: #008800; font-weight: bold">case</span> <span style="color: #005588; font-weight: bold">0xFF629D</span> <span style="color: #333333">:</span> car_front<span style="color: #333333">();</span> <span style="color: #888888">//Recive 0xFF629D, el coche va hacia delante</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>efront<span style="color: #333333">);</span>   
+                    <span style="color: #008800; font-weight: bold">break</span><span style="color: #333333">;</span>
+                    
+                    <span style="color: #008800; font-weight: bold">case</span> <span style="color: #005588; font-weight: bold">0xFFA857</span> <span style="color: #333333">:</span> car_back<span style="color: #333333">();</span> <span style="color: #888888">//Receive 0xFFA857, el coche va para atras</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>eback<span style="color: #333333">);</span> 
+                    <span style="color: #008800; font-weight: bold">break</span><span style="color: #333333">;</span>
+              
+                    <span style="color: #008800; font-weight: bold">case</span> <span style="color: #005588; font-weight: bold">0xFF22DD</span> <span style="color: #333333">:</span> car_left<span style="color: #333333">();</span> <span style="color: #888888">//Receive 0xFF22DD,el coche gira hacia la izquierda</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>eleft<span style="color: #333333">);</span> 
+                    <span style="color: #008800; font-weight: bold">break</span><span style="color: #333333">;</span>
+                   
+                    <span style="color: #008800; font-weight: bold">case</span> <span style="color: #005588; font-weight: bold">0xFFC23D</span> <span style="color: #333333">:</span> car_right<span style="color: #333333">();</span><span style="color: #888888">//Receive 0xFFC23D,el coche gira hacia la derecha</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>eright<span style="color: #333333">);</span>  
+                    <span style="color: #008800; font-weight: bold">break</span><span style="color: #333333">;</span>
+                   
+                    <span style="color: #008800; font-weight: bold">case</span> <span style="color: #005588; font-weight: bold">0xFF02FD</span> <span style="color: #333333">:</span> car_Stop<span style="color: #333333">();</span><span style="color: #888888">//Receive 0xFF02FD,el coche para</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>STOP01<span style="color: #333333">);</span> 
+                    <span style="color: #008800; font-weight: bold">break</span><span style="color: #333333">;</span>
+                  <span style="color: #333333">}</span>
+                      irrecv<span style="color: #333333">.</span><span style="color: #0000CC">resume</span><span style="color: #333333">();</span> <span style="color: #888888">// recive el siguiente valor</span>
+                <span style="color: #333333">}</span>
+              
+                
+                 <span style="color: #008800; font-weight: bold">if</span> <span style="color: #333333">(</span>mode <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">1</span><span style="color: #333333">)</span> <span style="color: #333333">{</span>
+                    <span style="color: #888888">//automatico</span>
+                    avoid<span style="color: #333333">();</span> <span style="color: #888888">//inicia el control automatico</span>
+                 <span style="color: #333333">}</span> 
+              
+                 <span style="color: #008800; font-weight: bold">if</span> <span style="color: #333333">(</span>mode <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">2</span><span style="color: #333333">)</span> <span style="color: #333333">{</span>
+                  <span style="color: #888888">// siguelineas</span>
+                  tracking<span style="color: #333333">();</span> <span style="color: #888888">//INICIA EL TRACKING</span>
+                 <span style="color: #333333">}</span>
+              <span style="color: #333333">}</span>
+              
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">avoid</span><span style="color: #333333">()</span>
+              <span style="color: #333333">{</span>
+                distance<span style="color: #333333">=</span>sr04<span style="color: #333333">.</span><span style="color: #0000CC">Distance</span><span style="color: #333333">();</span> <span style="color: #888888">//obtain the value detected by ultrasonic sensor </span>
+              
+                <span style="color: #008800; font-weight: bold">if</span><span style="color: #333333">((</span>distance <span style="color: #333333">&lt;</span> <span style="color: #0000DD; font-weight: bold">20</span><span style="color: #333333">)&amp;&amp;(</span>distance <span style="color: #333333">!=</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">))</span><span style="color: #888888">//if the distance is greater than 0 and less than 10  </span>
+              
+                <span style="color: #333333">{</span>
+                  car_Stop<span style="color: #333333">();</span><span style="color: #888888">//stop</span>
+                  matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                  matrix_display<span style="color: #333333">(</span>STOP01<span style="color: #333333">);</span><span style="color: #888888">//en la pantalla sale que para</span>
+                  delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">1000</span><span style="color: #333333">);</span>
+                  servopulse<span style="color: #333333">(</span>servopin<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">160</span><span style="color: #333333">);</span><span style="color: #888888">//el servo gira 160°</span>
+                  delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">500</span><span style="color: #333333">);</span>
+                  a1<span style="color: #333333">=</span>sr04<span style="color: #333333">.</span><span style="color: #0000CC">Distance</span><span style="color: #333333">();</span><span style="color: #888888">//mide la distancia</span>
+                  delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">100</span><span style="color: #333333">);</span>
+                  servopulse<span style="color: #333333">(</span>servopin<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">20</span><span style="color: #333333">);</span><span style="color: #888888">//rotate to 20 degree</span>
+                  delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">500</span><span style="color: #333333">);</span>
+                  a2<span style="color: #333333">=</span>sr04<span style="color: #333333">.</span><span style="color: #0000CC">Distance</span><span style="color: #333333">();</span><span style="color: #888888">//mide la distancia</span>
+                  delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">100</span><span style="color: #333333">);</span>
+                  servopulse<span style="color: #333333">(</span>servopin<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">90</span><span style="color: #333333">);</span>  <span style="color: #888888">//Return to the 90 degree position</span>
+                  delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">500</span><span style="color: #333333">);</span>
+                  <span style="color: #008800; font-weight: bold">if</span><span style="color: #333333">(</span>a1 <span style="color: #333333">&gt;</span> a2<span style="color: #333333">)</span><span style="color: #888888">//compara la distancia, si la distancia de la izquierda es mas que la de la derecha</span>
+                  <span style="color: #333333">{</span>
+                    car_left<span style="color: #333333">();</span><span style="color: #888888">//gira hacia la izquierda</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>eleft<span style="color: #333333">);</span>    <span style="color: #888888">//display left-turning pattern</span>
+                    servopulse<span style="color: #333333">(</span>servopin<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">90</span><span style="color: #333333">);</span> <span style="color: #888888">//servo gira 90 grados</span>
+                    delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">700</span><span style="color: #333333">);</span> <span style="color: #888888">//turn left 700ms</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>efront<span style="color: #333333">);</span>  <span style="color: #888888">//show forward pattern</span>
+                  <span style="color: #333333">}</span>
+                  <span style="color: #008800; font-weight: bold">else</span><span style="color: #888888">//if the right distance is greater than the left</span>
+                  <span style="color: #333333">{</span>
+                    car_right<span style="color: #333333">();</span><span style="color: #888888">//turn right</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>eright<span style="color: #333333">);</span>  <span style="color: #888888">//display right-turning pattern</span>
+                    servopulse<span style="color: #333333">(</span>servopin<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">90</span><span style="color: #333333">);</span><span style="color: #888888">//servo rotates to 90 degree</span>
+                    delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">700</span><span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                    matrix_display<span style="color: #333333">(</span>efront<span style="color: #333333">);</span>  <span style="color: #888888">//show forward pattern</span>
+                  <span style="color: #333333">}</span>
+                <span style="color: #333333">}</span>
+                <span style="color: #008800; font-weight: bold">else</span> <span style="color: #888888">//otherwise</span>
+                <span style="color: #333333">{</span>
+                  car_front<span style="color: #333333">();</span><span style="color: #888888">//va recto</span>
+                  matrix_display<span style="color: #333333">(</span>clear<span style="color: #333333">);</span>
+                  matrix_display<span style="color: #333333">(</span>efront<span style="color: #333333">);</span>  <span style="color: #888888">// show forward pattern</span>
+                <span style="color: #333333">}</span>
+              <span style="color: #333333">}</span>
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">car_front</span><span style="color: #333333">()</span> <span style="color: #888888">//define que va hacia delante</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span>HIGH<span style="color: #333333">);</span> <span style="color: #888888">//hacia delante</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">105</span><span style="color: #333333">);</span> <span style="color: #888888">//velocidad</span>
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span>HIGH<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">105</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">car_back</span><span style="color: #333333">()</span> <span style="color: #888888">//define que va hacia detras</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span>LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">150</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span>LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">150</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">car_left</span><span style="color: #333333">()</span> <span style="color: #888888">//define que el coche gira hacia la izquierda</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span> <span style="color: #0000DD; font-weight: bold">100</span><span style="color: #333333">);</span>  
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span> <span style="color: #0000DD; font-weight: bold">155</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">car_right</span><span style="color: #333333">()</span> <span style="color: #888888">//define que el coche gira hacia la derecha</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span> <span style="color: #0000DD; font-weight: bold">155</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span> <span style="color: #0000DD; font-weight: bold">100</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">car_Stop</span><span style="color: #333333">()</span> <span style="color: #888888">//con esto defines que el coche pare</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span>LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span>LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              
+              <span style="color: #888888">//this function is used for dot matrix display</span>
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">matrix_display</span><span style="color: #333333">(</span>unsigned <span style="color: #333399; font-weight: bold">char</span> matrix_value<span style="color: #333333">[])</span>
+              <span style="color: #333333">{</span>
+                IIC_start<span style="color: #333333">();</span>  <span style="color: #888888">//the function that calls the data transfer start condition</span>
+                IIC_send<span style="color: #333333">(</span><span style="color: #005588; font-weight: bold">0xc0</span><span style="color: #333333">);</span>  <span style="color: #888888">//select address</span>
+              
+                <span style="color: #008800; font-weight: bold">for</span> <span style="color: #333333">(</span><span style="color: #333399; font-weight: bold">int</span> i <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">;</span> i <span style="color: #333333">&lt;</span> <span style="color: #0000DD; font-weight: bold">16</span><span style="color: #333333">;</span> i<span style="color: #333333">++)</span> <span style="color: #888888">//the pattern data is 16 bytes</span>
+                <span style="color: #333333">{</span>
+                  IIC_send<span style="color: #333333">(</span>matrix_value<span style="color: #333333">[</span>i<span style="color: #333333">]);</span> <span style="color: #888888">//Transmit the data of the pattern</span>
+                <span style="color: #333333">}</span>
+                IIC_end<span style="color: #333333">();</span>   <span style="color: #888888">//End pattern data transmission</span>
+                IIC_start<span style="color: #333333">();</span>
+                IIC_send<span style="color: #333333">(</span><span style="color: #005588; font-weight: bold">0x8A</span><span style="color: #333333">);</span>  <span style="color: #888888">//Display control, select 4/16 pulse width</span>
+                IIC_end<span style="color: #333333">();</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #888888">//Conditions under which data transmission begins</span>
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">IIC_start</span><span style="color: #333333">()</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>SDA_Pin<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>SCL_Pin<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                delayMicroseconds<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">3</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>SDA_Pin<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                delayMicroseconds<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">3</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>SCL_Pin<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              
+              <span style="color: #888888">//Indicates the end of data transmission</span>
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">IIC_end</span><span style="color: #333333">()</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>SCL_Pin<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>SDA_Pin<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                delayMicroseconds<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">3</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>SCL_Pin<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                delayMicroseconds<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">3</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>SDA_Pin<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                delayMicroseconds<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">3</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              
+              <span style="color: #888888">//transmit data</span>
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">IIC_send</span><span style="color: #333333">(</span>unsigned <span style="color: #333399; font-weight: bold">char</span> send_data<span style="color: #333333">)</span>
+              <span style="color: #333333">{</span>
+                <span style="color: #008800; font-weight: bold">for</span> <span style="color: #333333">(</span><span style="color: #333399; font-weight: bold">byte</span> mask <span style="color: #333333">=</span> <span style="color: #005588; font-weight: bold">0x01</span><span style="color: #333333">;</span> mask <span style="color: #333333">!=</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">;</span> mask <span style="color: #333333">&lt;&lt;=</span> <span style="color: #0000DD; font-weight: bold">1</span><span style="color: #333333">)</span> <span style="color: #888888">//Each byte has 8 bits and is checked bit by bit starting at the lowest level</span>
+                <span style="color: #333333">{</span>
+                  <span style="color: #008800; font-weight: bold">if</span> <span style="color: #333333">(</span>send_data <span style="color: #333333">&amp;</span> mask<span style="color: #333333">)</span> <span style="color: #333333">{</span> <span style="color: #888888">//Sets the high and low levels of SDA_Pin depending on whether each bit of the byte is a 1 or a 0</span>
+                    digitalWrite<span style="color: #333333">(</span>SDA_Pin<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                  <span style="color: #333333">}</span> <span style="color: #008800; font-weight: bold">else</span> <span style="color: #333333">{</span>
+                    digitalWrite<span style="color: #333333">(</span>SDA_Pin<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                  <span style="color: #333333">}</span>
+                  delayMicroseconds<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">3</span><span style="color: #333333">);</span>
+                  digitalWrite<span style="color: #333333">(</span>SCL_Pin<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span> <span style="color: #888888">//Pull the clock pin SCL_Pin high to stop data transmission</span>
+                  delayMicroseconds<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">3</span><span style="color: #333333">);</span>
+                  digitalWrite<span style="color: #333333">(</span>SCL_Pin<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span> <span style="color: #888888">//pull the clock pin SCL_Pin low to change the SIGNAL of SDA </span>
+                <span style="color: #333333">}</span>
+              <span style="color: #333333">}</span>
+              
+              <span style="color: #888888">//FF6897 es el numero 1</span>
+              <span style="color: #888888">//FF9867 es el numero 2</span>
+              
+              
+              <span style="color: #888888">//*******************************************************************************</span>
+              
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">servopulse</span><span style="color: #333333">(</span><span style="color: #333399; font-weight: bold">int</span> servopin<span style="color: #333333">,</span><span style="color: #333399; font-weight: bold">int</span> myangle<span style="color: #333333">)</span><span style="color: #888888">//the running angle of servo</span>
+              <span style="color: #333333">{</span>
+                <span style="color: #008800; font-weight: bold">for</span><span style="color: #333333">(</span><span style="color: #333399; font-weight: bold">int</span> i<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">;</span> i<span style="color: #333333">&lt;</span><span style="color: #0000DD; font-weight: bold">20</span><span style="color: #333333">;</span> i<span style="color: #333333">++)</span>
+                <span style="color: #333333">{</span>
+                  <span style="color: #333399; font-weight: bold">int</span> pulsewidth <span style="color: #333333">=</span> <span style="color: #333333">(</span>myangle<span style="color: #333333">*</span><span style="color: #0000DD; font-weight: bold">11</span><span style="color: #333333">)+</span><span style="color: #0000DD; font-weight: bold">500</span><span style="color: #333333">;</span>
+                  digitalWrite<span style="color: #333333">(</span>servopin<span style="color: #333333">,</span>HIGH<span style="color: #333333">);</span>
+                  delayMicroseconds<span style="color: #333333">(</span>pulsewidth<span style="color: #333333">);</span>
+                  digitalWrite<span style="color: #333333">(</span>servopin<span style="color: #333333">,</span>LOW<span style="color: #333333">);</span>
+                  delay<span style="color: #333333">(</span><span style="color: #0000DD; font-weight: bold">20</span><span style="color: #333333">-</span>pulsewidth<span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">1000</span><span style="color: #333333">);</span>
+                <span style="color: #333333">}</span> 
+              <span style="color: #333333">}</span>
+              
+              <span style="color: #888888">///codigo siguelineas</span>
+              
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">tracking</span><span style="color: #333333">()</span>
+              <span style="color: #333333">{</span>
+                L_val <span style="color: #333333">=</span> digitalRead<span style="color: #333333">(</span>sensor_L<span style="color: #333333">);</span> <span style="color: #888888">//lee el valor del sensor de movimiento izquierdo</span>
+                M_val <span style="color: #333333">=</span> digitalRead<span style="color: #333333">(</span>sensor_M<span style="color: #333333">);</span> <span style="color: #888888">//lee el valor del sensor de movimiento del medio</span>
+                R_val <span style="color: #333333">=</span> digitalRead<span style="color: #333333">(</span>sensor_R<span style="color: #333333">);</span> <span style="color: #888888">//lee el valor del sensor de movimiento derecho</span>
+              
+                <span style="color: #008800; font-weight: bold">if</span><span style="color: #333333">(</span>M_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">1</span><span style="color: #333333">){</span><span style="color: #888888">// si el estado del del medio es 1, que significa que detecta la linea negra</span>
+              
+                   <span style="color: #008800; font-weight: bold">if</span> <span style="color: #333333">(</span>L_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">1</span> <span style="color: #333333">&amp;&amp;</span> R_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">)</span> <span style="color: #333333">{</span> <span style="color: #888888">//si la linea negra se detecta en la izquierda, pero no en la derecha, gira hacia la izquierda</span>
+                      left<span style="color: #333333">();</span>
+                  <span style="color: #333333">}</span>
+                   <span style="color: #008800; font-weight: bold">else</span> <span style="color: #0066BB; font-weight: bold">if</span> <span style="color: #333333">(</span>L_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">0</span> <span style="color: #333333">&amp;&amp;</span> R_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">1</span><span style="color: #333333">)</span> <span style="color: #333333">{</span> <span style="color: #888888">//por otra parte, si la linea negra se detecta en la derecha, pero no en la izquierda, gira hacia la derecha</span>
+                    right<span style="color: #333333">();</span>
+                  <span style="color: #333333">}</span>
+                   <span style="color: #008800; font-weight: bold">else</span> <span style="color: #333333">{</span> <span style="color: #888888">//por otra parte, va recto</span>
+                    front<span style="color: #333333">();</span>
+                  <span style="color: #333333">}</span>
+                <span style="color: #333333">}</span>
+                <span style="color: #008800; font-weight: bold">else</span> <span style="color: #333333">{</span> <span style="color: #888888">//No black lines detected in the middle</span>
+                  <span style="color: #008800; font-weight: bold">if</span> <span style="color: #333333">(</span>L_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">1</span> <span style="color: #333333">&amp;&amp;</span> R_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">)</span> <span style="color: #333333">{</span> <span style="color: #888888">//If a black line is detected on the left, but not on the right, turn left</span>
+                    left<span style="color: #333333">();</span>
+                  <span style="color: #333333">}</span>
+                  <span style="color: #008800; font-weight: bold">else</span> <span style="color: #0066BB; font-weight: bold">if</span> <span style="color: #333333">(</span>L_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">0</span> <span style="color: #333333">&amp;&amp;</span> R_val <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">1</span><span style="color: #333333">)</span> <span style="color: #333333">{</span> <span style="color: #888888">//Otherwise, if a black line is detected on the right and not on the left, turn right</span>
+                    right<span style="color: #333333">();</span>
+                  <span style="color: #333333">}</span>
+                  <span style="color: #008800; font-weight: bold">else</span> <span style="color: #333333">{</span> <span style="color: #888888">//Otherwise,stop</span>
+                    Stop<span style="color: #333333">();</span>
+                  <span style="color: #333333">}</span>
+                <span style="color: #333333">}</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">front</span><span style="color: #333333">()</span><span style="color: #888888">//define the status of going forward</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span>HIGH<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">155</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span>HIGH<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">155</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">back</span><span style="color: #333333">()</span><span style="color: #888888">//define the state of going back</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span>LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">100</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span>LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">100</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">left</span><span style="color: #333333">()</span><span style="color: #888888">//define the left-turning state</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span> <span style="color: #0000DD; font-weight: bold">100</span><span style="color: #333333">);</span>  
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span> <span style="color: #0000DD; font-weight: bold">155</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">right</span><span style="color: #333333">()</span><span style="color: #888888">//define the right-turning state</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span> HIGH<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span> <span style="color: #0000DD; font-weight: bold">155</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span> <span style="color: #0000DD; font-weight: bold">100</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">Stop</span><span style="color: #333333">()</span><span style="color: #888888">//define the state of stop</span>
+              <span style="color: #333333">{</span>
+                digitalWrite<span style="color: #333333">(</span>left_ctrl<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>left_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">);</span>
+                digitalWrite<span style="color: #333333">(</span>right_ctrl<span style="color: #333333">,</span> LOW<span style="color: #333333">);</span>
+                analogWrite<span style="color: #333333">(</span>right_pwm<span style="color: #333333">,</span><span style="color: #0000DD; font-weight: bold">0</span><span style="color: #333333">);</span>
+              <span style="color: #333333">}</span>
+              <span style="color: #888888">//*********************************************************</span>
+              </pre></div>
+              </p>
 
         </section>
     </div>
